@@ -1,0 +1,142 @@
+---
+title: "create_seurat_objects_from cellranger_output" # from kallisto output
+output: html_document
+---
+
+# this workflow reads cellranger output, removes empty droplets & creates seurat objects, which will be saved under kb_data/out/"index"
+# based on seurat 3.1.5, dropletutils 1.9.0
+
+# file structure: ~/kb_data/fastq    --> place fastq files here; no need to unpack; '.fastq.gz'
+#                 ~/kb_data/ref_seqs --> reference transcriptome data for kallisto index (.fa.gz & .gtf.gz)
+#                 ~/kb_data/index    --> contains the created index files; T-DBG
+#                 ~/kb_data/out/     --> output directory
+
+```{r message=FALSE, warning=FALSE}
+#load packages
+#library(BUSpaRse)
+library(tidyverse)
+library(stringr)
+library(ggplot2)
+library(dplyr)
+library(Seurat)
+library(DropletUtils)
+library(Matrix)
+library(R.utils)
+
+# SETUP
+
+expers <- c("dr_RGC_larva_s1", "dr_RGC_adult_s17", "dr_pineal_s1", "dr_pineal_s2",
+            "nf_embryo_s1", "nf_embryo_s2",
+            "am_hk_cave_s1", "am_hk_surf_s1",
+            "dm_brain_s1", "dm_brain_s2",
+            "ce_embryo_s1", "ce_embryo_s2",
+            "ci_larva_s1", "ci_larva_s2",
+            "mm_neuron_2k_v2", "mm_neuron_9k_v2", "mm_neuron_1k_v3", "mm_neuron_10k_v3",
+            "hs_pbmc_4k_v2", "hs_pbmc_8k_v2", "hs_pbmc_1k_v3", "hs_pbmc_10k_v3"
+            )
+
+index <- c('D_rerio.GRCz11.101', 'D_rerio.GRCz11.101', 'D_rerio.GRCz11.101', 'D_rerio.GRCz11.101',
+           "N_furzeri.Nfu.101", "N_furzeri.Nfu.101",
+           "A_mexicanus.2.0.100", "A_mexicanus.2.0.100",
+           "D_melanogaster.BDGP6.28.100", "D_melanogaster.BDGP6.28.100",
+           "C_elegans.WBcel235.100", "C_elegans.WBcel235.100",
+           "C_intestinalis.KH.100", "C_intestinalis.KH.100",
+           "M_musculus.GRCm38.100", "M_musculus.GRCm38.100", "M_musculus.GRCm38.100", "M_musculus.GRCm38.100",
+           "H_sapiens.GRCh38.100", "H_sapiens.GRCh38.100", "H_sapiens.GRCh38.100", "H_sapiens.GRCh38.100"
+           )
+
+project <- paste(expers, "_cr", sep="")
+
+
+# some metadata options
+# conds <- c("-brood", "-brood", "+brood", "+brood")
+# conds <- c("NA")
+# species <- c("L. ocellatus", "L. ocellatus", "L. ocellatus", "L. ocellatus")
+
+#setup working directory
+knitr::opts_knit$set(root.dir = '~/kb_data/')
+```
+# Create seurat objects of filtered cellranger output
+
+
+```{r}
+i <- 0
+for(exp in expers) {
+  i <- i + 1
+  print(paste0("Working on: ", exp))
+  seu <- Read10X(data.dir = str_c("~/cellranger_data/ensembl/", exp, "/filtered_feature_bc_matrix/"))
+  seu <- CreateSeuratObject(counts = seu, project = project[i], min.cells = 3, min.feature = 200)
+  saveRDS(seu, file = str_c("~/kb_data/out/", index[i], "/", exp, "_cellr.rds"))
+  print(seu)
+}
+```
+
+--> RAW
+```{r}
+i <- 0
+for(exp in expers) {
+  i <- i + 1
+  seu <- Read10X(data.dir = str_c("~/cellranger_data/", exp, "/outs/raw_feature_bc_matrix/"))
+  seu <- CreateSeuratObject(counts = seu, project = project[i], min.cells = 3, min.feature = 200)
+  saveRDS(seu, file = str_c("~/kb_data/out/", index[i], "/", exp, "_cellr_raw.rds"))
+  seu
+}
+```
+
+# Remove empty droplets with dropletutils and create seurat objects
+
+```{r}
+i <- 0
+for (e in expers) {
+  i <- i + 1
+  res_mat <- read10xCounts(str_c("~/cellranger_data/", e, "/outs/raw_feature_bc_matrix/"), col.names = TRUE)
+  dim(res_mat)
+  tot_counts <- Matrix::colSums(res_mat@assays@data@listData$counts)
+  summary(tot_counts)
+  bc_rank <- barcodeRanks(counts(res_mat))
+  
+  # knee plot
+  knee_plot <- function(bc_rank) {
+  knee_plt <- tibble(rank = bc_rank[["rank"]],
+                     total = bc_rank[["total"]]) %>% 
+    distinct() %>% 
+    dplyr::filter(total > 0)
+  annot <- tibble(inflection = metadata(bc_rank)[["inflection"]],
+                  rank_cutoff = max(bc_rank$rank[bc_rank$total > metadata(bc_rank)[["inflection"]]]))
+  p <- ggplot(knee_plt, aes(total, rank)) +
+    geom_line() +
+    geom_hline(aes(yintercept = rank_cutoff), data = annot, linetype = 2) +
+    geom_vline(aes(xintercept = inflection), data = annot, linetype = 2) +
+    scale_x_log10() +
+    scale_y_log10() +
+    annotation_logticks() +
+    labs(y = "Rank", x = "Total UMIs")
+  ggsave(str_c("~/kb_data/out/", index[i], "/", e, "/knee_plot_cellr_du.png"), last_plot(), device="png", width = 9, height = 6)
+  return(p)
+  }
+  
+  options(repr.plot.width=9, repr.plot.height=6)
+  knee_plot(bc_rank)
+  
+  # add gene_ids to matrix (not really sure why they are missing in the first place!!!)
+  gunzip(str_c("~/cellranger_data/", e, "/outs/raw_feature_bc_matrix/features.tsv.gz"), remove = FALSE, overwrite = TRUE)
+  table <- read.table(file = str_c("~/cellranger_data/", e, "/outs/raw_feature_bc_matrix/features.tsv"), header = FALSE, sep = "\t")
+  res_mat@assays@data@listData$counts@Dimnames[1] <- table[2]
+  
+  res_mat <- res_mat[, tot_counts > metadata(bc_rank)$inflection]
+  res_mat # use print() to show output in a for loop
+  
+  seu <- CreateSeuratObject(res_mat@assays@data@listData$counts, min.cells = 3, min.feature = 200, project = project[i])
+  # seu$cond <- conds[match(e, expers)]
+  # seu$species <- species[match(e, expers)]
+  saveRDS(seu, file = str_c("~/kb_data/out/", index[i], "/", e, "_cellr_du.rds"))  # seu.rds is saved
+  print(seu)
+}
+```
+
+# ```{r}
+# gunzip("~/cellranger_data/DR_20190226_pretectum_s1/outs/raw_feature_bc_matrix/features.tsv.gz", remove = FALSE, overwrite = TRUE)
+# table <- read.table(file = "~/cellranger_data/DR_20190226_pretectum_s1/outs/raw_feature_bc_matrix/features.tsv", header = FALSE, sep = "\t")
+# table[2]
+# ```
+
