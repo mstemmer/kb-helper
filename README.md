@@ -12,18 +12,14 @@ sample = provide name of sequenced sample
 reference = specify the reference you want to align to
 version = specify scSeq experiment version (see kallisto manual for more info)
 
-Example of samplesheet.tsv:
-sample  dr_RGC_adult_s17    dr_pineal_s1
-reference       D_rerio.GRCz11.101_mt      D_rerio.GRCz11.101
-version 10xv3   10xv3
+An example of a samplesheet.tsv can be found in the tool's folder.
 
 Index generation:
 Custom index from BioMart:
 --> Place <reference>.fa.gz into kb_data/ref-seqs/ & add <reference> to reference list
 --> this tool will then create the index for you
 --> only works correctly, if fasta headers follow this BioMart structure:
->transcriptID|geneID|geneName|cDNA. 
-NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+>transcriptID|geneID|geneName|cDNA
 
 Use genomic data:
 To create index and tr2g files from genomic data, use 'kb ref' (see kallisto manual for more info)
