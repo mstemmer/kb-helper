@@ -48,6 +48,7 @@ class RunAlignment():
         parser.add_argument('-m', '--memory', metavar='', dest='m', default=16, type=int, help='Memory to use in GB. Defaults to 16')
         parser.add_argument('--gene_names_off', dest='gn_off', action='store_true', default=False, help='Do not change gene_ID with gene_name.')
         self.args = parser.parse_args()
+        # print(self.args.gn_off)
 
     def setup_dir(self): # Setup working directory
         os.chdir(os.path.expanduser("~")) #change to /home/$USER/
@@ -82,7 +83,7 @@ class RunAlignment():
             kb.check_ref()
             kb.mod_tr2g() # checks trg2 file, if there are NA or blank fields in gene_name column of tr2g file
             kb.count(self.args.t, self.args.m) # pseudoalignemnt; default is threads=16, memory=16G
-            if self.args.gn_off == True:
+            if self.args.gn_off == False:
                 kb.mod_genes() # OPTIONAL, switches gene_name with gene_id in the matrix files. If used, gene_names will be seen in seurat instead of ENSEMBL IDs
 
 
