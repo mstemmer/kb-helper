@@ -22,7 +22,7 @@ Custom index from BioMart:
 --> Place <reference>.fa.gz into kb_data/ref-seqs/ & add <reference> to reference list
 --> this tool will then create the index for you
 --> only works correctly, if fasta headers follow this BioMart structure:
->transcriptID|geneID|geneName|cDNA
+>transcriptID|geneID|geneName|cDNA 
 NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
 Use genomic data:
