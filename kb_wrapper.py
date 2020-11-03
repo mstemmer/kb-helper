@@ -10,9 +10,9 @@ import argparse
 https://www.kallistobus.tools/downloads
 https://pachterlab.github.io/kallisto/download
 
-Run main.py and it will create the file structure for you in your home directory.
+Just run kb_wrapper.py and it will create the file structure for you in your home directory.
 
-Paste fastq files in /kb_data/fastq/<sample_id>/
+Paste (or symlink) fastq files in /kb_data/fastq/<sample_id>/
 Make sure that sequencing lanes are merged. So there is only one R1 and one R2 file in the folder.
 
 Create a samplesheet.tsv and place it into kb_data.
@@ -21,18 +21,23 @@ reference = specify the reference you want to align to
 version = specify scSeq experiment version (see kallisto manual for more info)
 
 Example of samplesheet.tsv:
-sample  ab_telencephalon_20190402_s3    lo_telencephalon_20190429_s1
-reference       A_burtoni.AstBur1.0.100_mt      N_brichardi.NeoBri1.0.100
+sample  dr_RGC_adult_s17    dr_pineal_s1
+reference       D_rerio.GRCz11.101_mt      D_rerio.GRCz11.101
 version 10xv3   10xv3
 
+Index generation:
 Custom index from BioMart:
 --> Place <reference>.fa.gz into kb_data/ref-seqs/ & add <reference> to reference list
 --> this tool will then create the index for you
---> only works correctly, if fasta headers follow BioMart structure:
->transcriptID|geneID|geneName|cDNA sequence
+--> only works correctly, if fasta headers follow this BioMart structure:
+>transcriptID|geneID|geneName|cDNA
+NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 
-To create index and tr2g files from Genome data, use kb ref (see kallisto manual for more info)
+Use genomic data:
+To create index and tr2g files from genomic data, use 'kb ref' (see kallisto manual for more info)
 and place the generated files into kb_data/index/
+
+Make sure that the index files are in this format: <reference>.idx (e.g. D_rerio.GRCz11.101.idx)
 '''
 
 class RunAlignment():
@@ -40,8 +45,10 @@ class RunAlignment():
         parser = argparse.ArgumentParser(prog='kb_wrapper')
         parser.add_argument('--samplesheet', dest='samples', metavar='', help='Please provide path to samplesheet (tsv format)')
         parser.add_argument('-t', '--threads', metavar='', dest='t', default=32, type=int, help='Number of threads to use. Defaults to 32')
-        parser.add_argument('-m', '--memory', metavar='', dest='m', default=32, type=int, help='Memory to use in GB. Defaults to 32')
+        parser.add_argument('-m', '--memory', metavar='', dest='m', default=16, type=int, help='Memory to use in GB. Defaults to 16')
+        parser.add_argument('--gene_names_off', dest='gn_off', action='store_true', default=False, help='Do not change gene_ID with gene_name.')
         self.args = parser.parse_args()
+        # print(self.args.gn_off)
 
     def setup_dir(self): # Setup working directory
         os.chdir(os.path.expanduser("~")) #change to /home/$USER/
@@ -61,7 +68,6 @@ class RunAlignment():
             print('--> Samplesheet not found. Please provide a valid samplesheet in tsv format with --samplesheet <path>')
             sys.exit("--> Exiting program")
         print(self.sample_sheet)
-        # print("~ Filename: {}".format(args.samplesheet))
         print('--> Number of samples: ' + str(len(self.sample_sheet.columns)))
 
     def align(self):
@@ -76,8 +82,9 @@ class RunAlignment():
             kb = KallistoBustools(sample, reference, version)
             kb.check_ref()
             kb.mod_tr2g() # checks trg2 file, if there are NA or blank fields in gene_name column of tr2g file
-            kb.count(self.args.t, self.args.m) # pseudoalignemnt against standard ensembl references; default is threads=16, memory=16G
-            kb.mod_genes() # OPTIONAL, switches gene_name with gene_id in the matrix files. If used, gene_names will be seen in seurat instead of ENSEMBL IDs
+            kb.count(self.args.t, self.args.m) # pseudoalignemnt; default is threads=16, memory=16G
+            if self.args.gn_off == False:
+                kb.mod_genes() # OPTIONAL, switches gene_name with gene_id in the matrix files. If used, gene_names will be seen in seurat instead of ENSEMBL IDs
 
 
 if __name__ == '__main__':
