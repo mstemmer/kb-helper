@@ -24,7 +24,6 @@ library(Matrix)
 library(R.utils)
 
 # SETUP
-
 expers <- c("dr_RGC_larva_s1", "dr_RGC_adult_s17", "dr_pineal_s1", "dr_pineal_s2",
             "nf_embryo_s1", "nf_embryo_s2",
             "am_hk_cave_s1", "am_hk_surf_s1",
@@ -47,18 +46,11 @@ index <- c('D_rerio.GRCz11.101', 'D_rerio.GRCz11.101', 'D_rerio.GRCz11.101', 'D_
 
 project <- paste(expers, "_cr", sep="")
 
-
-# some metadata options
-# conds <- c("-brood", "-brood", "+brood", "+brood")
-# conds <- c("NA")
-# species <- c("L. ocellatus", "L. ocellatus", "L. ocellatus", "L. ocellatus")
-
 #setup working directory
 knitr::opts_knit$set(root.dir = '~/kb_data/')
 ```
+
 # Create seurat objects of filtered cellranger output
-
-
 ```{r}
 i <- 0
 for(exp in expers) {
@@ -71,7 +63,7 @@ for(exp in expers) {
 }
 ```
 
---> RAW
+# Create seurat objects of UNfiltered cellranger output
 ```{r}
 i <- 0
 for(exp in expers) {
@@ -84,7 +76,6 @@ for(exp in expers) {
 ```
 
 # Remove empty droplets with dropletutils and create seurat objects
-
 ```{r}
 i <- 0
 for (e in expers) {
@@ -133,10 +124,3 @@ for (e in expers) {
   print(seu)
 }
 ```
-
-# ```{r}
-# gunzip("~/cellranger_data/DR_20190226_pretectum_s1/outs/raw_feature_bc_matrix/features.tsv.gz", remove = FALSE, overwrite = TRUE)
-# table <- read.table(file = "~/cellranger_data/DR_20190226_pretectum_s1/outs/raw_feature_bc_matrix/features.tsv", header = FALSE, sep = "\t")
-# table[2]
-# ```
-

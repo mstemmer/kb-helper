@@ -24,18 +24,6 @@ library(Matrix)
 
 # SETUP
 
-# expers <- c("dr_RGC_larva_s1", "dr_RGC_adult_s17", "dr_pineal_s1", "dr_pineal_s2",
-#             "dr_RGC_larva_s1", "dr_RGC_adult_s17", "dr_pineal_s1", "dr_pineal_s2"
-#             # "dr_RGC_larva_s1", "dr_RGC_adult_s17", "dr_pineal_s1", "dr_pineal_s2"
-#             )
-# 
-# index <- c("D_rerio.GRCz11.101", "D_rerio.GRCz11.101", "D_rerio.GRCz11.101", "D_rerio.GRCz11.101",
-#             'D_rerio.GRCz11.v4.3.2', 'D_rerio.GRCz11.v4.3.2', 'D_rerio.GRCz11.v4.3.2', 'D_rerio.GRCz11.v4.3.2'
-#            # "D_rerio.GRCz11.101.bm", "D_rerio.GRCz11.101.bm", "D_rerio.GRCz11.101.bm", "D_rerio.GRCz11.101.bm"
-#            )
-# 
-# cellr_cells <- c(3988, 2483, 4982, 7460, 4210, 2521, 5067, 7576)
-
 expers <- c("dr_RGC_larva_s1", "dr_RGC_adult_s17", "dr_pineal_s1", "dr_pineal_s2",
             "nf_embryo_s1", "nf_embryo_s2",
             "am_hk_cave_s1", "am_hk_surf_s1",
@@ -58,16 +46,10 @@ index <- c('D_rerio.GRCz11.101', 'D_rerio.GRCz11.101', 'D_rerio.GRCz11.101', 'D_
 
 project <- paste(expers, "_kb", sep="")
 
-
 cellr_cells <- c(3988, 2483, 4982, 7460, 9279, 9289, 9249, 16522, 2213, 2141, 8702, 8557, 6079, 5986, 2295, 11012, 1232, 11548, 4586, 8682, 1182, 11454)
 
 add_cells <- c(5, 5, 80, 160, 1200, 1000, 5, 100, 80, 60, 10, 10, 90, 100, 120, 100, 25, 170, 5, 5, 15, 30)
 expect_cells <- cellr_cells + add_cells
-# 3988, 2483, 4982, 7460, 9279, 9289, 9249, 16522, 2213, 2141, 8702, 8557, 6079, 5986, 2295, 11012, 1232, 11548, 4586, 8682, 1182, 11454
-# some metadata options
-# conds <- c("-brood", "-brood", "+brood", "+brood")
-# conds <- c("NA")
-# species <- c("L. ocellatus", "L. ocellatus", "L. ocellatus", "L. ocellatus")
 
 #setup working directory
 knitr::opts_knit$set(root.dir = '~/kb_data/')
@@ -124,7 +106,6 @@ knee_plot(bc_rank)
 
 
 # The next part can be used when dropletutils should not be used to identify the inflection point automatically
-
 ```{r}
 i <- 0
 for (e in expers) {
