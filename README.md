@@ -12,6 +12,7 @@ https://pachterlab.github.io/kallisto/download
 Now just run kb-helper.py and it will create the file structure for you in your home directory.  
 See also `kb-helper.py --help`. 
 
+
 ## How to prepare the samplesheet:  
 Simply create a TSV file following this structure:  
 ```
@@ -80,3 +81,6 @@ In the second part:
 The code on empty droplet removal was imported from the [kallisto vignettes](https://www.kallistobus.tools/tutorials)
 
 
+## Notes
+* kb-helper is in an early state and was primarily written to speed up and to channel multiple scSeq experiments, but I hope that it can be useful to a wider community
+* so far it was only tested on Linux (Ubuntu).
