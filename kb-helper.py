@@ -10,7 +10,7 @@ import argparse
 https://www.kallistobus.tools/downloads
 https://pachterlab.github.io/kallisto/download
 
-Just run kb_wrapper.py and it will create the file structure for you in your home directory.
+Just run kb-helper.py and it will create the file structure for you in your home directory.
 
 Paste (or symlink) fastq files in /kb_data/fastq/<sample_id>/
 Make sure that sequencing lanes are merged. So there is only one R1 and one R2 file in the folder.
@@ -42,7 +42,7 @@ Make sure that the index files are in this format: <reference>.idx (e.g. D_rerio
 
 class RunAlignment():
     def __init__(self):
-        parser = argparse.ArgumentParser(prog='kb_wrapper')
+        parser = argparse.ArgumentParser(prog='kb-helper')
         parser.add_argument('--samplesheet', dest='samples', metavar='', help='Please provide path to samplesheet (tsv format)')
         parser.add_argument('-t', '--threads', metavar='', dest='t', default=32, type=int, help='Number of threads to use. Defaults to 32')
         parser.add_argument('-m', '--memory', metavar='', dest='m', default=16, type=int, help='Memory to use in GB. Defaults to 16')
