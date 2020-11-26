@@ -1,6 +1,6 @@
 # kb-helper
 
-This little helper was created to further simplify usage of kallisto and bustools.
+This little helper was created to further simplify scSeq data alignment with kallisto and bustools. 
 It runs on pre-made index files or creates the necessary index and transcript_to_gene (tr2g) conversion table for you based on a custom fasta input.
 In addition, it batch processes several samples for you, based on a samplesheet and outputs gene names instead of gene IDs for more intuitive downstream processing.  
 
