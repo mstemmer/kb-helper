@@ -62,7 +62,7 @@ optional arguments:
 
 ```
 
-# Importing the output into Seurat
+## Importing the output into Seurat
 
 The repository also provides an R notebook to conveniently import the alignemt into Seurat.  
 In the notebook, just specify there again the sample_ids and references like this:
