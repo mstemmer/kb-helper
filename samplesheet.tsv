@@ -1,3 +1,3 @@
-sample	ab_telencephalon_20190402_s3	lo_telencephalon_20190429_s1
-reference	A_burtoni.AstBur1.0.100_mt	N_brichardi.NeoBri1.0.100
-version	10xv3	10xv3
+sample	dr_RGC_larva_s1	dr_pineal_s2
+reference	D_rerio.GRCz11.101	D_rerio.GRCz11.101.custom
+version	10xv3	10xv2
