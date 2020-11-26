@@ -69,6 +69,7 @@ class KallistoBustools():
         -g index/tr2g_{self.ref_name}_mod.tsv \
         -x {str(self.version)} \
         -o out/{self.ref_name}/{self.sample_id} \
+        --h5ad \
         fastq/{self.sample_id}/*R1*.fastq.gz fastq/{self.sample_id}/*R2*.fastq.gz')
 
     def count(self, threads, memory):
