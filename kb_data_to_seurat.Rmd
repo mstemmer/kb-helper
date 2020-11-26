@@ -4,11 +4,11 @@ output: html_document
 ---
 
 # this workflow reads kallisto/bustools matrix files, removes empty droplets & creates seurat objects, which will be saved under kb_data/out/"index"
-# based on seurat 3.1.5, dropletutils 1.9.0, busparse 1.3.0
+# based on seurat 4.0, dropletutils 1.9.0, busparse 1.3.0
 
-# file structure: ~/kb_data/fastq    --> place fastq files here; no need to unpack; '.fastq.gz'
-#                 ~/kb_data/ref_seqs --> reference transcriptome data for kallisto index (.fa.gz & .gtf.gz)
-#                 ~/kb_data/index    --> contains the created index files; T-DBG
+# file structure: ~/kb_data/fastq/    --> place fastq files here; no need to unpack; '.fastq.gz'
+#                 ~/kb_data/ref-seqs/ --> reference transcriptome data for kallisto index (.fa.gz & .gtf.gz)
+#                 ~/kb_data/index/    --> contains the created index files; T-DBG
 #                 ~/kb_data/out/     --> output directory
 
 ```{r message=FALSE, warning=FALSE}
@@ -24,40 +24,29 @@ library(Matrix)
 
 # SETUP
 
-expers <- c("dr_RGC_larva_s1", "dr_RGC_adult_s17", "dr_pineal_s1", "dr_pineal_s2",
-            "nf_embryo_s1", "nf_embryo_s2",
-            "am_hk_cave_s1", "am_hk_surf_s1",
-            "dm_brain_s1", "dm_brain_s2",
-            "ce_embryo_s1", "ce_embryo_s2",
-            "ci_larva_s1", "ci_larva_s2",
-            "mm_neuron_2k_v2", "mm_neuron_9k_v2", "mm_neuron_1k_v3", "mm_neuron_10k_v3",
-            "hs_pbmc_4k_v2", "hs_pbmc_8k_v2", "hs_pbmc_1k_v3", "hs_pbmc_10k_v3"
+expers <- c("sample_id"
             )
 
-index <- c('D_rerio.GRCz11.101', 'D_rerio.GRCz11.101', 'D_rerio.GRCz11.101', 'D_rerio.GRCz11.101',
-           "N_furzeri.Nfu.101", "N_furzeri.Nfu.101",
-           "A_mexicanus.2.0.100", "A_mexicanus.2.0.100",
-           "D_melanogaster.BDGP6.28.100", "D_melanogaster.BDGP6.28.100",
-           "C_elegans.WBcel235.100", "C_elegans.WBcel235.100",
-           "C_intestinalis.KH.100", "C_intestinalis.KH.100",
-           "M_musculus.GRCm38.100", "M_musculus.GRCm38.100", "M_musculus.GRCm38.100", "M_musculus.GRCm38.100",
-           "H_sapiens.GRCh38.100", "H_sapiens.GRCh38.100", "H_sapiens.GRCh38.100", "H_sapiens.GRCh38.100"
+index <- c("reference"
            )
 
+EXAMPLES
+# expers <- c("dr_RGC_larva_s1", "dr_RGC_adult_s17", "dr_pineal_s1", "dr_pineal_s2",
+#             "hs_pbmc_4k_v2", "hs_pbmc_8k_v2", "hs_pbmc_1k_v3", "hs_pbmc_10k_v3"
+#             )
+# 
+# index <- c('D_rerio.GRCz11.101', 'D_rerio.GRCz11.101', 'D_rerio.GRCz11.101', 'D_rerio.GRCz11.101',
+#            "H_sapiens.GRCh38.100", "H_sapiens.GRCh38.100", "H_sapiens.GRCh38.100", "H_sapiens.GRCh38.100"
+#            )
+
 project <- paste(expers, "_kb", sep="")
-
-cellr_cells <- c(3988, 2483, 4982, 7460, 9279, 9289, 9249, 16522, 2213, 2141, 8702, 8557, 6079, 5986, 2295, 11012, 1232, 11548, 4586, 8682, 1182, 11454)
-
-add_cells <- c(5, 5, 80, 160, 1200, 1000, 5, 100, 80, 60, 10, 10, 90, 100, 120, 100, 25, 170, 5, 5, 15, 30)
-expect_cells <- cellr_cells + add_cells
 
 #setup working directory
 knitr::opts_knit$set(root.dir = '~/kb_data/')
 ```
 
+
 # Remove empty droplets and create seurat objects
-
-
 ```{r}
 i <- 0
 for (e in expers) {
@@ -97,63 +86,7 @@ knee_plot(bc_rank)
   dim(res_mat) # use print() to show output in a for loop
   
   seu <- CreateSeuratObject(res_mat, min.cells = 3, min.feature = 200, project = project[i])
-  #seu$cond <- conds[match(e, expers)]
-  #seu$species <- species[match(e, expers)]
   saveRDS(seu, file = str_c("~/kb_data/out/", index[i], "/", e, "_kb.rds"))  # seu.rds is saved
-  print(seu)
-}
-```
-
-
-# The next part can be used when dropletutils should not be used to identify the inflection point automatically
-```{r}
-i <- 0
-for (e in expers) {
-  i <- i + 1
-  print(paste0("Working on: ", e))
-  res_mat <- read_count_output(str_c("~/kb_data/out/", index[i], "/", e, "/counts_unfiltered/"), name = "cells_x_genes", tcc = FALSE)
-  dim(res_mat)
-  tot_counts <- Matrix::colSums(res_mat)
-  summary(tot_counts)
-  
-bc_rank <- barcodeRanks(res_mat, lower = 100)
-expected_cells <- expect_cells[i]
-umi_cutoff <- bc_rank$total[which.min(abs(as.vector(bc_rank$rank) - expected_cells))]
-knee_plot <- function(bc_rank) {
-  knee_plt <- tibble(rank = bc_rank[["rank"]],
-                     total = bc_rank[["total"]]) %>% 
-    distinct() %>% 
-    dplyr::filter(total > 0)
-  annot <- tibble(inflection = metadata(bc_rank)[["inflection"]],
-                  rank_cutoff = max(bc_rank$rank[bc_rank$total > metadata(bc_rank)[["inflection"]]]))
-  
-  
-  p <- ggplot(knee_plt, aes(total, rank)) +
-    geom_line() +
-    geom_hline(aes(yintercept = expected_cells), data = annot, linetype = 2) +
-    geom_vline(aes(xintercept = bc_rank$total[which.min(abs(as.vector(bc_rank$rank) - expected_cells))]), data = annot, linetype = 2) +
-    scale_x_log10() +
-    scale_y_log10() +
-    annotation_logticks() +
-    labs(y = "Rank", x = "Total UMIs")
-  ggsave(str_c("~/kb_data/out/", index[i], "/", e, "/", e, "_knee_plot_kb_forced.png"), last_plot(), device="png", width = 9, height = 6)
-  return(p)
-}
-
-options(repr.plot.width=9, repr.plot.height=6)
-knee_plot(bc_rank)
-
-  # Remove genes that are not detected and empty droplets
- res_mat <- res_mat[, tot_counts > umi_cutoff]
-# res_mat <- res_mat[, tot_counts > 1000]
-# res_mat <- res_mat[bc_rank > 8000, ]
-  res_mat <- res_mat[Matrix::rowSums(res_mat) > 0,]
-  dim(res_mat) # use print() to show output in a for loop
-  
-  seu <- CreateSeuratObject(res_mat, min.cells = 3, min.feature = 200, project = project[i])
-  #seu$cond <- conds[match(e, expers)]
-  #seu$species <- species[match(e, expers)]
-  saveRDS(seu, file = str_c("~/kb_data/out/", index[i], "/", e, "_kb_forced.rds"))  # seu.rds is saved
   print(seu)
 }
 ```
