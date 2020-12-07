@@ -44,7 +44,7 @@ Make sure that sequencing lanes are merged. So there is only one R1 and one R2 f
 ## How to run:  
 
 ```
-python kb-helper.py --samplesheet.tsv
+python kb-helper.py --samplesheet samplesheet.tsv
 ```
 
 ## Options:
