@@ -55,7 +55,7 @@ class KallistoBustools():
         ''' When gene name is NA or empty, Gene ID is copied to this field.'''
         print('--> Checking tr2g file. If name = NA or blank, then gene_name = gene_id')
         tr2g = pd.read_table(f'index/tr2g_{self.ref_name}.tsv', header=None)
-        tr2g_na = tr2g[tr2g[2].str.match('NA', na=True)] # na=True is needed because 'NA'doesnt seem to be recognized...but then also works with blank fields
+        tr2g_na = tr2g[tr2g[2].str.match('NA', na=True)] # na=True is needed because 'NA'doesnt seem to be recognied...but then also works with blank fields
         tr2g_na[2] = tr2g_na[1] # Set column 2 equal to column 1
         tr2g_rest = tr2g[~tr2g[2].str.match('NA', na=True)] # Extract all non_NA rows
         tr2g_mod = pd.concat([tr2g_rest, tr2g_na]) # Combine the two dfs
