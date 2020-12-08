@@ -35,7 +35,7 @@ To create index and tr2g files from genomic data, use 'kb ref' (see kallisto man
 and place the generated files into kb_data/index/
 
 Make sure that the index files are in this format: \<reference>.idx (e.g. D_rerio.GRCz11.101.idx)  
-  and the tr2g table in this: tr2g_\<reference>.tsv (e.g. tr2g_D_rerio.GRCz11.101.idx) 
+  and the tr2g table in this: tr2g_\<reference>.tsv (e.g. tr2g_D_rerio.GRCz11.101.tsv) 
 
 ## How to prepare the input:  
 Paste (or symlink) fastq files in /kb_data/fastq/<sample_id>/
