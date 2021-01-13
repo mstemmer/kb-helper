@@ -38,8 +38,8 @@ Make sure that the index files are in this format: \<reference>.idx (e.g. D_reri
   and the tr2g table in this: tr2g_\<reference>.tsv (e.g. tr2g_D_rerio.GRCz11.101.tsv) 
 
 ## How to prepare the input:  
-Paste (or symlink) fastq files in /kb_data/fastq/<sample_id>/
-Make sure that sequencing lanes are merged. So there is only one R1 and one R2 file in the folder (e.g. use cat).
+Paste (or symlink) fastq files in /kb_data/fastq/<sample_id>/  
+You can merge the sequencing lanes. The reads should look like: \*R1*.fastq.gz & \*R2*.fastq.gz
 
 ## How to run:  
 
