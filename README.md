@@ -39,7 +39,7 @@ Make sure that the index files are in this format: \<reference>.idx (e.g. D_reri
 
 ## How to prepare the input:  
 Paste (or symlink) fastq files in /kb_data/fastq/<sample_id>/  
-You can merge the sequencing lanes. The reads should look like: \*R1*.fastq.gz & \*R2*.fastq.gz
+Please merge sequencing lanes, if you have more than one per sample. The reads should look like: \*R1*.fastq.gz & \*R2*.fastq.gz
 
 ## How to run:  
 
